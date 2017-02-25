@@ -73,7 +73,7 @@ public class Station
 	public ArrayList<Double> getFilled()
 	{
 		ArrayList<Double> values = new ArrayList<Double>();
-		for(int i = 0; i < monthMetric.size(); i++)
+		for(int i = 1; i < monthMetric.size()+1; i++)
 		{
 			for(double percents: monthMetric.get(i))
 			{

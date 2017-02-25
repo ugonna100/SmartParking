@@ -132,4 +132,38 @@ public class DataReader {
 			
 		}
 	}
+	
+	public void exportYear() {
+		System.out.println("Exporting averages by month");
+		FileWriter fr = null;
+		try {
+			fr = new FileWriter(System.getProperty("user.dir") + "/stationMetrics/YearMetrics.csv");
+			fr.write("STATION_ID,STATION_NAME,AVG_POP\n");
+			for (String metricIndex : parkingMetrics.keySet()) {
+				Station station = parkingMetrics.get(metricIndex);
+				double sum = 0;
+				double size = station.getFilled().size();
+				for (double index : station.getFilled()) {
+					sum+= index;
+				}
+				double average = sum / size;
+				fr.write("" + metricIndex + "," + station.getName() + "," + average + "\n");
+				//System.out.println("Size: " + station.getMonthMetric().size());
+				
+			}
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if (fr != null) {
+				try {
+					fr.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }

@@ -10,6 +10,7 @@ public class Main {
 		dr.fillData();
 		
 		dr.exportMonth();
+		dr.exportYear();
 	}
 	
 }
