@@ -8,6 +8,8 @@ public class Main {
 		DataReader dr = new DataReader("C:/Users/Bakuano/Documents/[]Programming Projects/SmartParking/fixedInfo.csv");
 		dr.setStationFile("C:/Users/Bakuano/Documents/[]Programming Projects/SmartParking/Station.csv");
 		dr.fillData();
+		
+		dr.exportMonth();
 	}
 	
 }

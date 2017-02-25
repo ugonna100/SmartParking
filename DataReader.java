@@ -9,20 +9,20 @@ public class DataReader {
 	private String csvFile;
 	private String stationFile;
 	private BufferedReader br;
-	private HashMap<Integer,Parking_Info> parkingMetrics;
+	private HashMap<String,Station> parkingMetrics;
 	
 	public DataReader() {
 		csvFile = "";
 		stationFile = "";
 		br = null;
-		parkingMetrics = new HashMap<Integer, Parking_Info>();
+		parkingMetrics = new HashMap<String, Station>();
 	}
 	
 	public DataReader(String csvFile) {
 		this.csvFile = csvFile;
 		stationFile = "";
 		br = null;
-		parkingMetrics = new HashMap<Integer, Parking_Info>();
+		parkingMetrics = new HashMap<String, Station>();
 	}
 	
 	public String getCSV() {
@@ -51,24 +51,38 @@ public class DataReader {
 			while ((line = br.readLine()) != null) {
 				String[] parkingData = line.split(csvSplitBy);
 				
-				System.out.println("Station ID: " + parkingData[1] + " , Month: " + parkingData[2]);
-				Parking_Info station = new Parking_Info();
-				station.add(parkingData[2], Double.parseDouble(parkingData[5]) / 100);
-				parkingMetrics.put(parkingData[1], station);
+				//System.out.println("Station ID: " + parkingData[1] + " , Month: " + parkingData[2]);
+				if (parkingData.length >= 5) {
+					//System.out.println("Station ID: " + parkingData[1] + " , Month: " + parkingData[2]);
+					if (!parkingMetrics.containsKey(parkingData[1])) {
+						Station station = new Station();
+						station.add(Integer.parseInt(parkingData[2]), Double.parseDouble(parkingData[5]) / 100);
+						parkingMetrics.put(parkingData[1], station);
+					}
+					else {
+						parkingMetrics.get(parkingData[1]).add(Integer.parseInt(parkingData[2]), Double.parseDouble(parkingData[5]) / 100);
+					}
+				}
 			}
 			br = new BufferedReader(new FileReader(stationFile));
 			line = br.readLine();
 			while ((line = br.readLine()) != null) {
 				String[] parkingData = line.split(csvSplitBy);
 				
-				System.out.println("Station ID: " + parkingData[1] + " , Name: " + parkingData[2]);
-				parkingMetrics.get(parkingData[1]).setName(parkingData[2]);
+				if (parkingData.length >= 3) {
+					//System.out.println("Station ID: " + parkingData[1] + ", Name: " + parkingData[1] + ", " + parkingData[2]);
+					parkingMetrics.get(parkingData[0]).setName(parkingData[1]);
+					parkingMetrics.get(parkingData[0]).setSpaces(Integer.parseInt(parkingData[2]));
+				}
 			}
 		}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		catch (IOException e) {
+			e.printStackTrace();
+		}
+		catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
 		}
 		finally {
@@ -83,21 +97,23 @@ public class DataReader {
 		}
 	}
 	
-	public void exportData() {
+	public void exportMonth() {
 		System.out.println("Exporting averages by month");
-		FileWriter fr = new FileWriter("/stationMetrics/monthMetrics.csv");
-		fr.write("STATION_ID,STATION_NAME,AVG_POP");
+		FileWriter fr = null;
 		try {
-			for (int i = 0; i < parkingMetrics.size(); i++) {
-				Parking_Info station = parkingMetrics.get(i);
+			fr = new FileWriter(System.getProperty("user.dir") + "/stationMetrics/monthMetrics.csv");
+			fr.write("STATION_ID,STATION_NAME,AVG_POP\n");
+			for (String metricIndex : parkingMetrics.keySet()) {
+				Station station = parkingMetrics.get(metricIndex);
 				double sum = 0;
-				for (int j = 0; j < station.getMap().size(); j++) {
-					size = station.getFilled(j).size();
+				//System.out.println("Size: " + station.getMonthMetric().size());
+				for (int j = 1; j < station.getMonthMetric().size() + 1; j++) {
+					double size = station.getFilled(j).size();
 					for (double index : station.getFilled(j)) {
 						sum += index;
 					}
 					double average = sum / size;
-					fr.write("" + i + "," + station.getName() + "," + average);
+					fr.write("" + metricIndex + "," + station.getName() + "," + average + "\n");
 				}
 			}
 		}
@@ -107,7 +123,7 @@ public class DataReader {
 		finally {
 			if (fr != null) {
 				try {
-					fr.close());
+					fr.close();
 				}
 				catch (IOException e) {
 					e.printStackTrace();
